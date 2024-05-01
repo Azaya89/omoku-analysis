@@ -7,3 +7,6 @@ aiohttp
 scipy
 pandas
 hvplot
+gspread
+oauth2client
+subprocess
