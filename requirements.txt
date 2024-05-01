@@ -1,0 +1,9 @@
+panel
+jupyter
+transformers
+numpy
+torch
+aiohttp
+scipy
+pandas
+hvplot
