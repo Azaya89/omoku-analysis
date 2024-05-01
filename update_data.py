@@ -35,17 +35,19 @@ def save_to_csv(df, file_path):
 
 def git_commit_push():
     """Commits and pushes updated CSV file to GitHub."""
+    subprocess.run(['git', 'add', 'omoku_data.csv'], check=True)
     try:
-        # Commands to add, commit, and push to GitHub
-        subprocess.run(['git', 'add', 'omoku_data.csv'], check=True)
         subprocess.run(['git', 'commit', '-m', 'Update dataset'], check=True)
         subprocess.run(['git', 'push'], check=True)
     except subprocess.CalledProcessError as e:
-        print(f'Error in Git operation: {e}')
+        if "nothing to commit" in str(e):
+            print("No changes to commit.")
+        else:
+            print(f'Error in Git operation: {e}')
 
 if __name__ == "__main__":
-    SHEET_ID = 'omoku_power_supply'
-    RANGE_NAME = 'data'  # or whatever your range or sheet name is
+    SHEET_ID = '1dVa6SGm1j-z20NUDUlWSJgQffXzvJZ_a33wT_O5EOUk'
+    RANGE_NAME = 'data'
     FILE_PATH = 'omoku_data.csv'
 
     df = download_sheet(SHEET_ID, RANGE_NAME)

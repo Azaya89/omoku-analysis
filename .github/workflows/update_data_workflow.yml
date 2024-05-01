@@ -3,6 +3,7 @@ name: Update Data Workflow
 on:
   schedule:
     - cron: '0 10 * * *' # Run every day at 10:00 UTC
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
   update-data:
