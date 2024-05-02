@@ -9,4 +9,3 @@ pandas
 hvplot
 gspread
 oauth2client
-subprocess
