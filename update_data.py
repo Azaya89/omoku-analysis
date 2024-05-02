@@ -6,7 +6,7 @@ import subprocess
 def download_sheet(sheet_id, range_name):
     """Downloads data from Google Sheets and returns a DataFrame."""
     # Define the scope
-    scope = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+    scope = ['https://www.googleapis.com/auth/spreadsheets']
 
     # Add credentials to the account
     creds = ServiceAccountCredentials.from_json_keyfile_name('omoku-analysis-cred_key.json', scope)
