@@ -22,6 +22,12 @@ jobs:
         run: |
           pip install pandas gspread oauth2client
 
+      - name: Write credentials to file
+        run: |
+          echo '${{ secrets.GOOGLE_CREDENTIALS }}' > omoku-analysis-cred_key.json
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
       - name: Run the update script
         run: python update_data.py
 
