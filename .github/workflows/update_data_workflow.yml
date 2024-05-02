@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas gspread oauth2client subprocess
+          pip install pandas gspread oauth2client
 
       - name: Run the update script
         run: python update_data.py
