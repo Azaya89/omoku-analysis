@@ -46,7 +46,7 @@ def save_to_csv(df, file_path):
         raise ValueError("Empty DataFrame")
     try:
         df.to_csv(file_path, index=False)
-        logging.info(f"Data saved successfully at {datetime.now().strftime("%I:%M:%S %p")}.")
+        logging.info(f"Data saved successfully at {datetime.now().strftime('%I:%M:%S %p')}.")
     except Exception as e:
         logging.error(f"Failed to save data: {e}")
         raise
@@ -59,7 +59,7 @@ def git_commit_push():
         subprocess.run(['git', 'add', 'omoku_data.csv'], check=True)
         subprocess.run(['git', 'commit', '-m', 'Update dataset'], check=True)
         subprocess.run(['git', 'push'], check=True)
-        logging.info(f"Data updated successfully at {datetime.now().strftime("%I:%M:%S %p")}.")
+        logging.info(f"Data updated successfully at {datetime.now().strftime('%I:%M:%S %p')}.")
     except subprocess.CalledProcessError as e:
         if "nothing to commit" in str(e.stderr):
             logging.info("No changes to commit.")
