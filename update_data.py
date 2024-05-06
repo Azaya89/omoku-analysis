@@ -1,8 +1,13 @@
-import pandas as pd
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import logging
+import pandas as pd
 import requests
 import subprocess
+from datetime import datetime
+from oauth2client.service_account import ServiceAccountCredentials
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def download_sheet(sheet_id, range_name):
     """Downloads data from Google Sheets and returns a DataFrame."""
@@ -27,24 +32,24 @@ def download_sheet(sheet_id, range_name):
 
         # Convert to DataFrame
         df = pd.DataFrame(data)
-
         return df
     except gspread.exceptions.APIError as e:
-        print(f"API error occurred: {e}")
-        raise SystemExit(e)
+        logging.error(f"API error occurred: {e}")
+        raise
     except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
-        raise SystemExit(e)
+        logging.error(f"Request failed: {e}")
+        raise
 
 def save_to_csv(df, file_path):
     if df.empty:
-        raise SystemExit("No data to save: DataFrame is empty.")
+        logging.error("No data to save: DataFrame is empty.")
+        raise ValueError("Empty DataFrame")
     try:
         df.to_csv(file_path, index=False)
-        print("Data saved successfully.")
+        logging.info(f"Data saved successfully at {datetime.now().strftime("%I:%M:%S %p")}.")
     except Exception as e:
-        print(f"Failed to save data: {e}")
-        raise SystemExit(e)
+        logging.error(f"Failed to save data: {e}")
+        raise
 
 def git_commit_push():
     """Sets git configurations, commits, and pushes updated CSV file to GitHub."""
@@ -52,24 +57,18 @@ def git_commit_push():
         subprocess.run(['git', 'config', '--global', 'user.name', 'github-actions'], check=True)
         subprocess.run(['git', 'config', '--global', 'user.email', 'github-actions@github.com'], check=True)
         subprocess.run(['git', 'add', 'omoku_data.csv'], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to commit or push changes: {e}")
-        if "nothing to commit" in str(e.stderr):
-            print("No changes to commit.")
-        else:
-            raise SystemExit(e)
-        
-    try:
         subprocess.run(['git', 'commit', '-m', 'Update dataset'], check=True)
         subprocess.run(['git', 'push'], check=True)
+        logging.info(f"Data updated successfully at {datetime.now().strftime("%I:%M:%S %p")}.")
     except subprocess.CalledProcessError as e:
-        if "nothing to commit" in str(e):
-            print("No changes to commit.")
+        if "nothing to commit" in str(e.stderr):
+            logging.info("No changes to commit.")
         else:
-            print(f'Error in Git operation: {e}')
+            logging.error(f"Failed to commit or push changes: {e}")
+            raise
 
 if __name__ == "__main__":
-    try:   
+    try:
         SHEET_ID = '1dVa6SGm1j-z20NUDUlWSJgQffXzvJZ_a33wT_O5EOUk'
         RANGE_NAME = 'data'
         FILE_PATH = 'omoku_data.csv'
@@ -78,5 +77,5 @@ if __name__ == "__main__":
         save_to_csv(df, FILE_PATH)
         git_commit_push()
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        raise SystemExit(e)
+        logging.critical(f"An unexpected error occurred: {e}")
+        raise
