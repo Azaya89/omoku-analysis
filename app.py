@@ -27,7 +27,8 @@ df['Outages'] = df['Outages'].fillna((24-daily_average)).round(1)
 # Plots
 box_plot = df.hvplot.box(xlabel="Variables", ylabel="Number of hours", grid=True, title="Box Plot of Power Time and Outages")
 line_plot = df.hvplot.line(y='Power_time', ylabel='Number of hours', title='Daily power supply')
-density_plot = df.hvplot.density('Power_time', xlabel='Number of hours', xlim=(0,25), yaxis=None, hover=False, title='Density distribution of power supply')
+density_plot = df.hvplot.kde('Power_time', xlabel='Number of hours', xlim=(0,24), yaxis=None, hover=False,
+                                 title='Density distribution of power supply').opts(padding=(0,0))
 weekly_group = df.groupby('Day', sort=False).mean().reindex(days)
 weekly_plot = weekly_group.hvplot.bar(stacked=True, rot=45, ylabel='Number of hours', title='Average power supply by week day')
 
