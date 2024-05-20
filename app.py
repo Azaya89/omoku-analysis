@@ -36,11 +36,6 @@ weekly_plot = weekly_group.hvplot.bar(stacked=True, rot=45, ylabel='Number of ho
 pn.extension('tabulator', sizing_mode="stretch_width")
 
 ACCENT = "#4099da"
-styles = {
-    "box-shadow": "rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px",
-    "border-radius": "4px",
-    "padding": "10px",
-}
 BRAND_COLOR = ACCENT
 BRAND_TEXT_ON_COLOR = "white"
 CARD_STYLE = {
@@ -48,32 +43,33 @@ CARD_STYLE = {
   "padding": "10px",
   "border-radius": "5px"
 }
-header = pn.Row(
-    pn.pane.Markdown(
-        "# Omoku power supply report", styles={"color": BRAND_TEXT_ON_COLOR}, margin=(5, 20)
-    ),
-    styles={"background": BRAND_COLOR},
-)
+number_format = "{value:,.1f}"
+styles = {
+    "box-shadow": "rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px",
+    "border-radius": "4px",
+    "padding": "10px",
+}
+
 indicators = pn.FlexBox(
     pn.indicators.Number(
         value=daily_average,
         name="Average daily supply (Hrs)",
         default_color="gray",
-        format="{value:,.0f}",
+        format=number_format,
         styles=styles
     ),
     pn.indicators.Number(
         value=max_power,
         name="Highest daily supply (Hrs)",
         default_color="green",
-        format="{value:,.1f}",
+        format=number_format,
         styles=styles,
     ),
     pn.indicators.Number(
         value=min_power,
         name="Lowest daily supply (Hrs)",
         default_color="red",
-        format="{value:,.1f}",
+        format=number_format,
         styles=styles,
     ),
 )
