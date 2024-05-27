@@ -16,4 +16,4 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push https://Azaya89:$HF_TOKEN@huggingface.co/spaces/Azaya89/omoku-analysis main
+        run: git push --force https://Azaya89:$HF_TOKEN@huggingface.co/spaces/Azaya89/omoku-analysis main
