@@ -1,5 +1,6 @@
 import gspread
 import logging
+import os
 import pandas as pd
 import requests
 import subprocess
@@ -7,6 +8,15 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def read_existing_data(file_path):
+    """Reads existing data from a CSV file to compare with newly fetched data."""
+    if os.path.exists(file_path):
+        logging.info("Existing data file found. Reading data...")
+        return pd.read_csv(file_path)
+    else:
+        logging.info("No existing data file found.")
+        return pd.DataFrame()  # Return an empty DataFrame if file does not exist
 
 def download_sheet(sheet_id, range_name):
     """Downloads data from Google Sheets and returns a DataFrame."""
@@ -72,8 +82,14 @@ if __name__ == "__main__":
         RANGE_NAME = 'data'
         FILE_PATH = 'omoku_data.csv'
 
-        df = download_sheet(SHEET_ID, RANGE_NAME)
-        save_to_csv(df, FILE_PATH)
+        new_data = download_sheet(SHEET_ID, RANGE_NAME)
+        existing_data = read_existing_data(FILE_PATH)
+
+        if not new_data.empty and new_data.equals(existing_data):
+            logging.info("No new data to update.")
+            exit(0)
+    
+        save_to_csv(new_data, FILE_PATH)
         git_commit_push()
     except Exception as e:
         logging.critical(f"An unexpected error occurred: {e}")
