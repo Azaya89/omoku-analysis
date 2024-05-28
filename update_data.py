@@ -1,5 +1,6 @@
 import gspread
 import logging
+import numpy as np
 import os, sys
 import pandas as pd
 import requests
@@ -14,7 +15,7 @@ def read_existing_data(file_path):
     if os.path.exists(file_path):
         logging.info("Existing data file found. Reading data...")
         e_df = pd.read_csv(file_path)
-        logging.info(f"Data read successfully: {e_df.shape[0]} rows and {e_df.shape[1]} columns.")
+        logging.info(f"Data read successfully.")
         return e_df
     else:
         logging.info("No existing data file found.")
@@ -42,9 +43,11 @@ def download_sheet(sheet_id, range_name):
         data = worksheet.get_all_records()
 
         # Convert to DataFrame
-        n_df = pd.DataFrame(data)
-        logging.info(f"Data downloaded successfully: {n_df.shape[0]} rows and {n_df.shape[1]} columns.")
-        return n_df
+        df = pd.DataFrame(data).astype(str)
+        df.replace('', np.nan, inplace=True)
+        df = df.astype({'Power_time': 'float', 'Outages':'float'})
+        logging.info(f"New data downloaded successfully.")
+        return df
     except gspread.exceptions.APIError as e:
         logging.error(f"API error occurred: {e}")
         raise
@@ -68,7 +71,7 @@ def git_commit_push():
     try:
         subprocess.run(['git', 'config', '--global', 'user.name', 'github-actions'], check=True)
         subprocess.run(['git', 'config', '--global', 'user.email', 'github-actions@github.com'], check=True)
-        subprocess.run(['git', 'add', '.'], check=True)
+        subprocess.run(['git', 'add', 'omoku_data.csv'], check=True)
         subprocess.run(['git', 'commit', '-m', 'Update dataset'], check=True)
         subprocess.run(['git', 'push'], check=True)
         logging.info(f"Data updated successfully.")
@@ -89,7 +92,7 @@ if __name__ == "__main__":
         new_data = download_sheet(SHEET_ID, RANGE_NAME)
 
         if new_data.equals(existing_data):
-            logging.info("No new data to update.")
+            logging.info("No new entry for new data. Nothing to update.")
             sys.exit(0)
         else:
             save_to_csv(new_data, FILE_PATH)
