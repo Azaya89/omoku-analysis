@@ -1,6 +1,6 @@
 import gspread
 import logging
-import os
+import os, sys
 import pandas as pd
 import requests
 import subprocess
@@ -13,10 +13,12 @@ def read_existing_data(file_path):
     """Reads existing data from a CSV file to compare with newly fetched data."""
     if os.path.exists(file_path):
         logging.info("Existing data file found. Reading data...")
-        return pd.read_csv(file_path)
+        e_df = pd.read_csv(file_path)
+        logging.info(f"Data read successfully: {e_df.shape[0]} rows and {e_df.shape[1]} columns.")
+        return e_df
     else:
         logging.info("No existing data file found.")
-        return pd.DataFrame()  # Return an empty DataFrame if file does not exist
+        return pd.DataFrame()
 
 def download_sheet(sheet_id, range_name):
     """Downloads data from Google Sheets and returns a DataFrame."""
@@ -40,8 +42,9 @@ def download_sheet(sheet_id, range_name):
         data = worksheet.get_all_records()
 
         # Convert to DataFrame
-        df = pd.DataFrame(data)
-        return df
+        n_df = pd.DataFrame(data)
+        logging.info(f"Data downloaded successfully: {n_df.shape[0]} rows and {n_df.shape[1]} columns.")
+        return n_df
     except gspread.exceptions.APIError as e:
         logging.error(f"API error occurred: {e}")
         raise
@@ -65,7 +68,7 @@ def git_commit_push():
     try:
         subprocess.run(['git', 'config', '--global', 'user.name', 'github-actions'], check=True)
         subprocess.run(['git', 'config', '--global', 'user.email', 'github-actions@github.com'], check=True)
-        subprocess.run(['git', 'add', 'omoku_data.csv'], check=True)
+        subprocess.run(['git', 'add', '.'], check=True)
         subprocess.run(['git', 'commit', '-m', 'Update dataset'], check=True)
         subprocess.run(['git', 'push'], check=True)
         logging.info(f"Data updated successfully.")
@@ -82,15 +85,15 @@ if __name__ == "__main__":
         RANGE_NAME = 'data'
         FILE_PATH = 'omoku_data.csv'
 
-        new_data = download_sheet(SHEET_ID, RANGE_NAME)
         existing_data = read_existing_data(FILE_PATH)
+        new_data = download_sheet(SHEET_ID, RANGE_NAME)
 
-        if not new_data.empty and new_data.equals(existing_data):
+        if new_data.equals(existing_data):
             logging.info("No new data to update.")
-            exit(0)
-    
-        save_to_csv(new_data, FILE_PATH)
-        git_commit_push()
+            sys.exit(0)
+        else:
+            save_to_csv(new_data, FILE_PATH)
+            git_commit_push()
     except Exception as e:
         logging.critical(f"An unexpected error occurred: {e}")
         raise
