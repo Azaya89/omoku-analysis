@@ -2,3 +2,4 @@ omoku-analysis-cred_key.json
 *.png
 *.ipynb_checkpoints
 *.ipynb
+testings.py
