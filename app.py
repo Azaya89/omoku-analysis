@@ -3,33 +3,26 @@ import pandas as pd, panel as pn
 import hvplot.pandas # noqa
 
 # Data loading and cleaning
-df = pd.read_csv('omoku_data.csv', usecols=['Date', 'Power_time', 'Outages'], index_col='Date', parse_dates=True)
+df = pd.read_csv('omoku_data.csv', index_col='Date', parse_dates=True)
 
-day_order = {
-    0: 'Monday',
-    1: 'Tuesday',
-    2: 'Wednesday',
-    3: 'Thursday',
-    4: 'Friday',
-    5: 'Saturday',
-    6: 'Sunday'
-    }
-days = list(day_order.values())
+def clean_df(df):
+    df = df[df['Remark'].isna()]
+    return df.assign(Day=df.index.day_name())
 
-daily_average = df['Power_time'].mean()
-max_power = df['Power_time'].max()
-min_power = df['Power_time'].min()
+cleaned_df = clean_df(df)
 
-df['Day'] = df.index.dayofweek.map(day_order)
-df['Power_time'] = df['Power_time'].fillna(daily_average).round(1)
-df['Outages'] = df['Outages'].fillna((24-daily_average)).round(1)
+daily_average = cleaned_df['Power_time'].mean()
+max_power = cleaned_df['Power_time'].max()
+min_power = cleaned_df['Power_time'].min()
+
+days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+weekly_group = cleaned_df.groupby('Day', sort=False)[['Power_time', 'Outages']].mean().reindex(days)
 
 # Plots
-box_plot = df.hvplot.box(xlabel="Variables", ylabel="Number of hours", grid=True, title="Box Plot of Power Time and Outages")
-line_plot = df.hvplot.line(y='Power_time', ylabel='Number of hours', title='Daily power supply')
-density_plot = df.hvplot.kde('Power_time', xlabel='Number of hours', xlim=(0,24), yaxis=None, hover=False,
-                                 title='Density distribution of power supply').opts(padding=(0,0))
-weekly_group = df.groupby('Day', sort=False).mean().reindex(days)
+box_plot = cleaned_df.hvplot.box(xlabel="Variables", ylabel="Number of hours", grid=True, title="Box Plot of Power Time and Outages")
+line_plot = cleaned_df.hvplot.line(y='Power_time', ylabel='Number of hours', title='Daily power supply')
+density_plot = cleaned_df.hvplot.kde('Power_time', xlabel='Number of hours', xlim=(0,24), yaxis=None, hover=False,
+                             title='Density distribution of power supply').opts(padding=(0,0))
 weekly_plot = weekly_group.hvplot.bar(stacked=True, rot=45, ylabel='Number of hours', title='Average power supply by week day')
 
 # Dashboard
