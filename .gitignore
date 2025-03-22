@@ -2,8 +2,8 @@ omoku-analysis-cred_key.json
 *.png
 *.ipynb_checkpoints
 *.ipynb
-testings.py
 calc_power.py
 cron_log.log
 total_power_time.txt
 power_events.csv
+.DS_Store
